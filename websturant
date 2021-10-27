@@ -1,0 +1,95 @@
+package automationFramework;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class automateTest {
+
+	public static void main(String[] args) throws InterruptedException {
+		// TODO Auto-generated method stub
+		
+		List<String> searchResultText= new ArrayList();
+		Boolean flag= true;
+		System.setProperty("webdriver.chrome.driver", "C:\\Users\\52500\\eclipse-workspace\\Selenium\\Drivers\\chromedriver.exe");
+		WebDriver driver= new ChromeDriver();
+		driver.get("https://www.webstaurantstore.com/");
+		//find search text box
+		driver.findElement(By.xpath("//input[@type='text']")).sendKeys("stainless work table");
+		//click search button
+		driver.findElement(By.xpath("//button[@type='submit']")).click();
+		// put Search results in a list
+		
+		List<WebElement> serachResultsList = driver.findElements(By.xpath("//div[@class='ag-item gtm-product ']//a[contains(@data-testid,\"itemDescription\")]"));
+        int size = serachResultsList.size();
+        //System.out.println(size);
+        
+        //find href text from the search results and store in another list to ensure it contains table
+       if(size!=0)
+       {
+    	      for(int i =0; i<size; i++)
+    	        {
+    	        	searchResultText.add((serachResultsList.get(i).getAttribute("href")));
+    	        }
+    	        
+    	        for(int i =0; i<searchResultText.size(); i++)
+    	        {
+    	        	String verifyTable=searchResultText.get(i);
+    	        	if(!verifyTable.contains("table"))
+    	        	{
+    	        		flag=false;
+    	        	}
+    	        }
+       }
+  
+        //check if title contains table keyword
+        if(flag.equals(false))
+        {
+        System.out.println("Search result does not conatin table in Title");
+        }
+        else
+        	System.out.println("All Search results contain table in Title");
+        
+        //add last element to cart
+      WebElement last= serachResultsList.get(size-1);
+      last.click();
+      
+      // Store the current window handle
+      String winHandleBefore = driver.getWindowHandle();
+
+      // Perform the click operation that opens new window
+
+      // Switch to new window opened
+      for(String winHandle : driver.getWindowHandles()){
+          driver.switchTo().window(winHandle);
+      }
+      
+      //click add to cart
+      driver.findElement(By.xpath("//input[@id='buyButton']")).click();
+      
+      //click view cart
+      driver.findElement(By.xpath("//a[@href='/viewcart.cfm']")).click();
+      
+     // click empty cart
+      driver.findElement(By.xpath("//a[@class='emptyCartButton btn btn-mini btn-ui pull-right']")).click();
+      
+     // wait for Empty cart popup to appear and click empty cart 
+      WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+      wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[text()='Empty Cart']")));
+      wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[text()='Empty Cart']")));
+      driver.findElement(By.xpath("//button[text()='Empty Cart']")).click();
+        
+      //quit the browser 
+      driver.quit();
+	}
+
+}
